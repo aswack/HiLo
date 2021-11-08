@@ -34,6 +34,12 @@ public class GuessingGame extends JFrame {
 		getContentPane().add(lblInstructions);
 		
 		txtGuess = new JTextField();
+		txtGuess.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				tries++;
+				checkGuess();
+			}
+		});
 		txtGuess.setBounds(320, 81, 44, 20);
 		getContentPane().add(txtGuess);
 		txtGuess.setColumns(10);
@@ -66,27 +72,41 @@ public class GuessingGame extends JFrame {
 		getContentPane().add(triesOutput);
 	}
 	
+	
 	//Check if guess is correct
 	public void checkGuess() {
+		
 		String guessText = txtGuess.getText();
-		int theGuess = Integer.parseInt(guessText);
 		String message1 =  "";
-		String message2 = "It only took you "+tries+" tries! Good work!!";
 		
-		if(theGuess<theNumber) message1 = theGuess+" is too low. Try again.";
-		else if (theGuess>theNumber) message1 = theGuess+" is too high. Try again.";
-		else message1 = theGuess+" is correct! You win!";
-		
-		lblOutput.setText(message1);
-		triesOutput.setText(Integer.toString(tries));
+		try{
+			int theGuess = Integer.parseInt(guessText);
+			if(theGuess<theNumber) message1 = theGuess+" is too low. Try again.";
+			else if (theGuess>theNumber) message1 = theGuess+" is too high. Try again.";
+			else{
+				message1 = theGuess+" is correct! You win!";
+				newGame(this.theScore);
+			}
+		} catch (Exception e) {
+			message1 = "ERROR: Enter a whole number between 1 and 100";
+		} finally {
+			lblOutput.setText(message1);
+			triesOutput.setText(Integer.toString(tries));
+			
+			//txtGuess.setText("");
+			txtGuess.grabFocus();
+			txtGuess.selectAll();
+		}
 	}
 	
-	//Start new gameplay session and generat random number
+	
+	//Start new gameplay session and generate random number
 	public void newGame(int theScore) {
 		this.theScore = theScore;
 		Random rand = new Random();
 		theNumber = rand.nextInt(101);
 	}
+	
 	
 	//set initial score as zero and start GUI session
 	public static void main(String[] args) {
