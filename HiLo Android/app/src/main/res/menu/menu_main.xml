@@ -2,9 +2,36 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.hilo.MainActivity">
+
     <item
         android:id="@+id/action_settings"
-        android:orderInCategory="100"
+        android:orderInCategory="300"
         android:title="@string/action_settings"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_newgame"
+        android:orderInCategory="100"
+        android:title="New Game"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_gamestats"
+        android:orderInCategory="200"
+        android:title="Game Stats"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_resetscore"
+        android:orderInCategory="210"
+        android:title="Reset Score"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_about"
+        android:orderInCategory="400"
+        android:title="About"
+        app:showAsAction="never"
+        />
+
 </menu>

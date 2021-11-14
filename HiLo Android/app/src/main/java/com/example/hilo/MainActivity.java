@@ -1,11 +1,15 @@
 package com.example.hilo;
 
+import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.view.MenuInflater;
 import android.view.View;
 
 import androidx.navigation.NavController;
@@ -28,47 +32,115 @@ public class MainActivity extends AppCompatActivity {
     private EditText txtGuess;
     private Button btnGuess;
     private TextView lblOutput;
-
     private int theNumber;
     private int theScore;
-
-    //private TextView triesOutput; //PLANNED FUNCTIONALITY FOR GUI COUNTER
+    private String difficulty = "Normal";
     private int tries = 0;
+    private AppBarConfiguration appBarConfiguration;
+    private ActivityMainBinding binding;
+    /*PLANNED FUNCTIONALITY FOR GUI COUNTER
+    private TextView triesOutput; */
 
     public void checkGuess() {
         String guessText = txtGuess.getText().toString();
-        String message1 = "";
-        String message2 = "You Win!! It only took you "+tries+" tries!!";49
+        String message = "";
+        String winMessage = "You Win!! It only took you "+tries+" tries!!";
 
         try {
             int theGuess = Integer.parseInt(guessText);
             tries++;
             if (theGuess < theNumber) {
-                message1 = theGuess + " is too low. Try again.";
+                message = theGuess + " is too low. Try again.";
             } else if (theGuess > theNumber) {
-                message1 = theGuess + " is too high. Try again.";
+                message = theGuess + " is too high. Try again.";
             } else {
-                message1 = theGuess + " is correct! You win! Let's play again!";
-                Toast.makeText(MainActivity.this, message2, Toast.LENGTH_LONG).show();
-                newGame(this.theScore);
+                message = theGuess + " is correct! You win! Let's play again!";
+                //Toast.makeText(MainActivity.this, winMessage, Toast.LENGTH_LONG).show();
+                //newGame(this.theScore);
+                final CharSequence[] items = {"Yes!", "No."};
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Play again?");
+                builder.setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which){
+                            case 0:
+                                newGame(theScore);
+                                break;
+                            case 1:
+                                break;
+                        }
+                        dialog.dismiss();
+                    }
+                });
+                AlertDialog alert = builder.create();
+                alert.show();
             }
         } catch (Exception e) {
-            message1 = "ERROR: Enter a whole number between 1 and 100";
+            switch (this.difficulty) {
+                case "Easy":
+                    message = "ERROR: Enter a whole number between 1 and 10";
+                    break;
+                case "Hard":
+                    message = "ERROR: Enter a whole number between 1 and 1,000";
+                    break;
+                default:
+                    message = "ERROR: Enter a whole number between 1 and 100";
+            }
         } finally {
-            lblOutput.setText(message1);
-            //triesOutput.setText(Integer.toString(tries));
+            lblOutput.setText(message);
             txtGuess.setText("");
+            //triesOutput.setText(Integer.toString(tries));
         }
     }
 
+    /*
+    ALLOWS FOR NEW GAMES TO CONTINUE IN THE SAME DIFFICULTY THE PREVIOUS GAME WAS
+    PASSES ALONG TO THE OVERLOADED METHOD THAT ACTUALLY STARTS THE NEW GAME
+    */
     public void newGame(int theScore) {
-        this.theScore = theScore;
-        Random rand = new Random();
-        theNumber = rand.nextInt(101);
+        String newGameDiff;
+        switch (this.difficulty) {
+            case "Easy":
+                newGameDiff = "Easy";
+                break;
+            case "Hard":
+                newGameDiff = "Hard";
+                break;
+            default:
+                newGameDiff = "Normal";
+        }
+        newGame(theScore, newGameDiff);
     }
 
-    private AppBarConfiguration appBarConfiguration;
-    private ActivityMainBinding binding;
+    //OVERLOADED METHOD - SETS THE DEFAULT SCORE AND THE DIFFICULTY LEVEL
+    public void newGame(int theScore, String difficulty) {
+        this.theScore = theScore;
+        tries = 0;
+        Random rand = new Random();
+        switch (difficulty){
+            case "Easy":
+                this.difficulty = "Easy";
+                theNumber = rand.nextInt(11);
+                txtGuess.setText("5");
+                txtGuess.requestFocus();
+                txtGuess.selectAll();
+                break;
+            case "Hard":
+                this.difficulty = "Hard";
+                theNumber = rand.nextInt(1001);
+                txtGuess.setText("500");
+                txtGuess.requestFocus();
+                txtGuess.selectAll();
+                break;
+            default:
+                this.difficulty = "Normal";
+                theNumber = rand.nextInt(101);
+                txtGuess.setText("50");
+                txtGuess.requestFocus();
+                txtGuess.selectAll();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,17 +196,54 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        //This switch statement determines which item the user selected
+        switch(item.getItemId()){
+            case R.id.action_settings:
+                final CharSequence[] items = {"Easy (1-10)", "Normal (1-100)", "Hard (1-1,000)"};
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Select the Difficulty");
+                builder.setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which){
+                            case 0:
+                                newGame(theScore, "Easy");
+                                break;
+                            case 1:
+                                newGame(theScore, "Normal");
+                                break;
+                            case 2:
+                                newGame(theScore, "Hard");
+                                break;
+                        }
+                        dialog.dismiss();
+                    }
+                });
+                AlertDialog alert = builder.create();
+                alert.show();
+                return true;
+            case R.id.action_newgame:
+                newGame(this.theScore);
+                return true;
+            case R.id.action_gamestats:
+                return true;
+            case R.id.action_about:
+                AlertDialog aboutDialog = new AlertDialog.Builder(MainActivity.this).create();
+                aboutDialog.setTitle("About Hi-Lo Guessing Game");
+                aboutDialog.setMessage("\u00A9 2021 Austin Swack");
+                aboutDialog.setMessage("All Rights Reserved");
+                aboutDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener(){
+                    public void onClick(DialogInterface dialog, int which){
+                        dialog.dismiss();
+                    }
+                });
+                aboutDialog.show();
+                return true;
+            case R.id.action_resetscore:
+                this.theScore = 0;
+                return true;
+            default: return super.onOptionsItemSelected(item);
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
